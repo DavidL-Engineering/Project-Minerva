@@ -40,7 +40,7 @@ class Simulation:
 
 
 all_sim_param = open("Simulation Parameters.csv", 'r')
-headers = all_sim_param.readline()
+all_sim_param.readline()
 line = all_sim_param.readline()
 
 while line != '':
