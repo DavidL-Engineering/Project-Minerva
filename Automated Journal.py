@@ -43,6 +43,8 @@ all_sim_param = open("Simulation Parameters.csv", 'r')
 all_sim_param.readline()
 line = all_sim_param.readline()
 
+sim_list = []
+
 while line != '':
     line = line.split(",")
     sim_mesh = Mesh_Properties(line[1], line[2])
@@ -66,6 +68,8 @@ while line != '':
 
     sim_workflow = Workflow_Properties(line[3], CG_bool, post_bool, streamlines_bool, line[12])
     sim_param = Simulation(line[0], sim_mesh, sim_dimensions, sim_workflow)
+
+    sim_list.append(sim_param)
 
     print(sim_param)
 
