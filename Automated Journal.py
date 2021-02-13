@@ -43,7 +43,7 @@ all_sim_param = open("Simulation Parameters.csv", 'r')
 all_sim_param.readline()
 line = all_sim_param.readline()
 
-sim_list = []
+sim_list = [] #Stores instances of sim_param
 
 while line != '':
     line = line.split(",")
