@@ -1,6 +1,7 @@
 Simulation Parameters.csv
 test.py
 
+.Results/*
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
