@@ -101,7 +101,7 @@ def results_dir(sim_list: list):
     for simulation in sim_list:
         results_dir_check(simulation.workflow.results_dir, simulation.workflow.post, simulation.workflow.streamlines)
 
-def results_dir_check(path, post_bool: bool, streamlines_bool: bool):
+def results_dir_check(path, post: bool, streamlines: bool):
     '''
     Str -> None
 
