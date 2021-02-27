@@ -99,9 +99,9 @@ def param_extract(input_file):
 
 def results_dir(sim_list: list):
     for simulation in sim_list:
-        results_dir_check(simulation.Workflow_Properties.results_dir, simulation.Workflow_Properties.post)
+        results_dir_check(simulation.workflow.results_dir, simulation.workflow.post, simulation.workflow.streamlines)
 
-def results_dir_check(path, post_bool):
+def results_dir_check(path, post_bool: bool, streamlines_bool: bool):
     '''
     Str -> None
 
@@ -110,12 +110,15 @@ def results_dir_check(path, post_bool):
     if (os.path.exists(path) == False):
         os.mkdir(path)
     
-    media_dir = os.path.join(path, "Media Files")
-    if (os.path.exists(media_dir) == False):
-        os.mkdir(media_dir)
-    media_subdir = ["\\3D Cp Contour", "\\Pressure Contour", "\\TKE Contour", "\\Wall Shear Streamline"]
+    if post:
+        media_dir = os.path.join(path, "Media Files")
+        if (os.path.exists(media_dir) == False):
+            os.mkdir(media_dir)
+        media_subdir = ["\\3D Cp Contour", "\\Pressure Contour", "\\TKE Contour", "\\Wall Shear Streamline"]
 
-    for subdir in media_subdir:
-        if (os.path.exists(media_dir + subdir) == False):
-            os.mkdir(media_dir + subdir)
+        for subdir in media_subdir:
+            if (os.path.exists(media_dir + subdir) == False):
+                os.mkdir(media_dir + subdir)
+        if streamlines:
+            os.mkdir(media_dir + "\\Streamline Animations")
     return
