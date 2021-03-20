@@ -97,6 +97,22 @@ def param_extract(input_file):
 
     return(output_list)
 
+def initialize_project(input_file):
+    all_sim_param = open(input_file, 'r')
+
+    next(all_sim_param)
+    line = all_sim_param.readline()
+    line = line.split(",")
+    # print(line)
+
+    proj_name = line[14]
+    proj_dir = line[15]
+    print(proj_dir)
+    proj_dir = proj_dir.replace(os.sep, '/')
+    print(proj_dir)
+
+    Save(FilePath=("{}/{}.wbpj", proj_dir, proj_name), Overwrite=True)
+
 def results_dir(sim_list: list):
     for simulation in sim_list:
         results_dir_check(simulation.workflow.results_dir, simulation.workflow.post, simulation.workflow.streamlines)
