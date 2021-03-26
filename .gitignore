@@ -2,8 +2,8 @@ Simulation Parameters.csv
 test.py
 
 .__pycache__/*
-.Results/*
-.Journal Logs/*
+Results/
+Journal Logs/
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
