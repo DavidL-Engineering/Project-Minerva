@@ -3,7 +3,7 @@ test.py
 
 .__pycache__/*
 .Results/*
-.Journal Folder/*
+.Journal Logs/*
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
