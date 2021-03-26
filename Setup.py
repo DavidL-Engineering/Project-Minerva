@@ -1,2 +1,2 @@
 with open("Simulation Parameters.csv", 'w') as csvfile:
-    csvfile.write("Simulation Name,.CAS File Name,.CAS File Directory,Solution Method (K-W/T-SST),Area [m^2],Length[m],CG (Y/N),CGx [m], CGy [m],CGz [m],Post-Processing (Y/N),Streamline Animations (Y/N),Results Directory, ,Workbench Project Name,Workbench Project Save Directory")
+    csvfile.write("Simulation Name,.CAS File Name (Exclude \".cas\" file extension),.CAS File Directory,Solution Method (K-W/T-SST),Area [m^2],Length[m],CG (Y/N),CGx [m], CGy [m],CGz [m],Post-Processing (Y/N),Streamline Animations (Y/N),Results Directory,Processes,,Workbench Project Name,Workbench Project Save Directory")
