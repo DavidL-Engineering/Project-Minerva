@@ -146,7 +146,7 @@ def fluent_sim_setup(sim_list):
     for sim in sim_list:
         if sim.Workflow_Properties.sol_method.lower() in komega:
             komega_setup(sim)
-        elif sim.Workflow_Properties.sol_method.lower() in tsst::
+        elif sim.Workflow_Properties.sol_method.lower() in tsst:
             tsst_setup(sim)
 
 
