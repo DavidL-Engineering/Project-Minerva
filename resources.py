@@ -1,15 +1,37 @@
 import os
 
 class Mesh_Properties:
+    '''
+    Mesh_Properties object stores the name and directory of the exported .CAS file containing the mesh.
+
+    Instance Variables
+    ---------------------
+    CAS_name : Name of .CAS file containing the mesh. Does not include file extension. [str]
+    CAS_dir : Directory containing the .CAS file with the name as indicated in CAS_name. [str]
+    '''
     def __init__(self, CAS_name = None, CAS_dir = None):
+        '''Define instance variables.'''
         self.CAS_name = CAS_name
         self.CAS_dir = CAS_dir
     
     def __str__(self):
+        '''Print properties of Mesh_Properties object.'''
         return "\n----MESH PROPERTIES----\nCAS file: {}\nLocated in {}".format(self.CAS_name, self.CAS_dir)
 
 class Dimension_Properties:
+    '''
+    Dimension_Properties object stores the dimensional properties of the object to be simulated.
+
+    Instance Variables
+    ---------------------
+    area : Reference area of aerobody in m^2. Typically the surface area. [float]
+    length : Reference length of aerobody in m. Typically the length in the x dimension. [float]
+    CG_X : X-coordinate of aerobody center of gravity in m. [float]
+    CG_Y : Y-coordinate of aerobody center of gravity in m. [float] 
+    CG_Z : Z-coordinate of aerobody center of gravity in m. [float] 
+    '''
     def __init__(self, area = None, length = None, CG_X = None, CG_Y = None, CG_Z = None):
+        '''Define instance variables.'''
         self.area = area #Stored in m^2
         self.length = length #Stored in m
         self.CG_X = CG_X #Stored in m
@@ -17,10 +39,24 @@ class Dimension_Properties:
         self.CG_Z = CG_Z #Stored in m
     
     def __str__(self):
+        '''Print properties of Dimension_Properties object.'''
         return "\n----DIMENSION PROPERTIES----\nArea is {}. Length is {}. Center of Gravity is ({}, {}, {})".format(self.area, self.length, self.CG_X, self.CG_Y, self.CG_Z)
 
 class Workflow_Properties:
+    '''
+    Workflow_Properties object stores the simulation setup and post-processing parameters.
+
+    Instance Variables
+    ---------------------
+    sol_method : Desired solution method. Either K-W or T-SST. [str]
+    CG : Specification of whether CG is entered and valid. [bool]
+    post : Specification of whether post-processing is desired if simulation converges. [bool]
+    streamlines : Specification of whether streamline animations are desired in post-processing. [bool]
+    results_dir : Directory in which the numerical and post-processing results should be stored. [str]
+    processes : Number of processes to use during simulations. [int]
+    '''
     def __init__(self, sol_method = None, CG = None, post = None, streamlines = None, results_dir = None, processes = None):
+        '''Define instance variables.'''
         self.sol_method = sol_method #Either K-W or T-SST
         self.CG = CG #Either True or False
         self.post = post #Either True or False
@@ -29,10 +65,29 @@ class Workflow_Properties:
         self.processes = processes #integer
 
     def __str__(self):
+        '''Print properties of Dimension_Properties object.'''
         return "\n----WORKFLOW PROPERTIES----\nSolution method: {}\nCG: {}\nPost-Processing: {}\nStreamline Animations: {}\nResults located in: {}\nNumber of simulation processes: {}".format(self.sol_method, self.CG, self.post, self.streamlines, self.results_dir, self.processes)
 
 class Simulation_Results:
+    '''
+    Simulation_Results object stores the extracted numerical results of the FLUENT simulation.
+
+    Instance Variables
+    ---------------------
+    convergence : Convergence status of completed simulation. [str]
+    iterations : Number of iterations completed before convergence status reached. [int]
+    drag_tot : Total drag force experienced in positive x direction in Newtons. [str]
+    drag_comp : Pressure and viscous drag force components experienced in positive x direction in Newtons. [str]
+    lift_tot : Total lift force experienced in positive z direction in Newtons. [str]
+    lift_comp : Pressure and viscous lift force components experienced in positive z direction in Newtons. [str]
+    f_left : Total aerodynamic force experienced in negative y direction in Newtons. [str]
+    f_right : Total aerodynamic force experienced in positive y direction in Newtons. [str]
+    mom_roll : Total aerodynamic moment experienced about x axis in Newton-metres. [str]
+    mom_pitch : Total aerodynamic moment experienced about y axis in Newton-metres. [str]
+    mom_yaw : Total aerodynamic moment experienced about z axis in Newton-metres. [str]
+    '''
     def __init__(self, convergence = None, iterations = None, drag_tot = None, drag_comp = None, lift_tot = None, lift_comp = None, f_left = None, f_right = None, mom_roll = None, mom_pitch = None, mom_yaw = None):
+        '''Define instance variables.'''
         self.convergence = convergence
         self.iterations = iterations
         self.drag_tot = drag_tot
@@ -46,7 +101,19 @@ class Simulation_Results:
         self.mom_yaw = mom_yaw
 
 class Simulation:
+    '''
+    Simulation object contains all ANSYS module, mesh, 3D model, simulation workflow, and results processing parameters to be used in the course of CFD simulations in ANSYS Fluent and CFD-Post.
+
+    Instance Variables
+    ---------------------
+    sim_name : Name of simulation. [str]
+    mesh : Instance of Mesh_Properties object.
+    dimension : Instance of Dimension_Properties object.
+    workflow : Instance of Workflow_Properties object.
+    results : Instance of Simulation_Results object.
+    '''
     def __init__(self, sim_name = None, mesh = None, dimension = None, workflow = None, results = None):
+        '''Define instance variables.'''
         self.sim_name = sim_name
         self.mesh = mesh
         self.dimension = dimension
@@ -54,13 +121,23 @@ class Simulation:
         self.results = results
 
     def __str__(self):
+        '''Print properties of Simulation_Properties object.'''
         return ("\n--------SIMULATION PROPERTIES--------\nSimulation: {} {} {} {}\n".format(self.sim_name, self.mesh, self.dimension, self.workflow))
 
 def param_extract(input_file):
     '''
-    Extracts simulation parameters to instances of Simulation() and stores in list
+    Extracts simulation parameters from CSV of name indicated by input_file to instances of Simulation object and stores in list.
     Str -> List
 
+    Parameters
+    ---------------------
+    input_file : string
+        String containing name and file extension of CSV file with simulation parameters to be imported.
+
+    Returns
+    ---------------------
+    output_list : list
+        List containing instances of Simulation object generated from each line of CSV file.
     '''
     all_sim_param = open(input_file, 'r')
     next(all_sim_param)
@@ -99,6 +176,18 @@ def param_extract(input_file):
     return(output_list)
 
 def initialize_project(input_file):
+    '''
+    Initializes ANSYS Workbench project.
+
+    Parameters
+    ---------------------
+    input_file : string
+        String containing name and file extension of CSV file with simulation parameters to be imported.
+
+    Returns
+    ---------------------
+    None
+    '''
     all_sim_param = open(input_file, 'r')
 
     next(all_sim_param)
@@ -113,14 +202,37 @@ def initialize_project(input_file):
     Save(FilePath=("{}/{}.wbpj", proj_dir, proj_name), Overwrite=True)
 
 def results_dir(sim_list: list):
+    '''
+    Runs results_dir_check on each simulation in a list of simulations.
+
+    Parameters
+    ---------------------
+    sim_list : list
+        List containing instances of Simulation object.
+
+    Returns
+    ---------------------
+    None
+    '''
     for simulation in sim_list:
         results_dir_check(simulation.workflow.results_dir, simulation.workflow.post, simulation.workflow.streamlines)
 
 def results_dir_check(path, post: bool, streamlines: bool):
     '''
-    Str -> None
+    Checks if path to results folder exists and creates parent and sub-folders for indicated results folder and post-processing folders.
 
-    Checks if path to results folder exists and creates parent and sub-folders if not
+    Parameters
+    ---------------------
+    path : str
+        Path to results folder for simulation.
+    post : bool
+        Boolean variable indicating whether post-processing results are desired.
+    streamlines : bool
+        Boolean variable indicating whether streamline animations are desired.
+
+    Returns
+    ---------------------
+    None
     '''
     if (os.path.exists(path) == False):
         os.mkdir(path)
@@ -139,7 +251,18 @@ def results_dir_check(path, post: bool, streamlines: bool):
     return
 
 def fluent_sim_setup(sim_list):
+    '''
+    Checks solution method to be used and runs appropriate Fluent module setup.
 
+    Parameters
+    ---------------------
+    sim_list : list
+        List containing instances of Simulation object.
+
+    Returns
+    ---------------------
+    None
+    '''
     komega = ["komega", "k-omega", "k-w", "kw"]
     tsst = ["t-sst", "tsst"]
 
@@ -151,7 +274,18 @@ def fluent_sim_setup(sim_list):
 
 
 def komega_setup(simulation):
-    
+    '''
+    Performs setup of Fluent module with K-W solution method.
+
+    Parameters
+    ---------------------
+    simulation : Simulation object
+        Instance of Simulation object.
+
+    Returns
+    ---------------------
+    None
+    '''
     template1 = GetTemplate(TemplateName="FLUENT")
     system1 = template1.CreateSystem()
     system1.DisplayText = simulation.sim_name
@@ -233,6 +367,18 @@ def komega_setup(simulation):
 
 
 def tsst_setup(simulation):
+    '''
+    Performs setup of Fluent module with T-SST solution method.
+
+    Parameters
+    ---------------------
+    simulation : Simulation object
+        Instance of Simulation object.
+
+    Returns
+    ---------------------
+    None
+    '''
     template1 = GetTemplate(TemplateName="FLUENT")
     system1 = template1.CreateSystem()
     system1.DisplayText = simulation.sim_name
