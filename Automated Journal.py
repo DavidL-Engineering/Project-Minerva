@@ -6,6 +6,6 @@ from resources import *
 
 sim_list = param_extract("Simulation Parameters.csv")
 
-initialize_project("Simulation Parameters.csv")
+# initialize_project("Simulation Parameters.csv")
 
-results_dir(sim_list)
+# results_dir(sim_list)
