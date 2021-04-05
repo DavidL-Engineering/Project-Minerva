@@ -9,6 +9,7 @@ class Mesh_Properties:
     CAS_name : Name of .CAS file containing the mesh. Does not include file extension. [str]
     CAS_dir : Directory containing the .CAS file with the name as indicated in CAS_name. [str]
     '''
+    
     def __init__(self, CAS_name = None, CAS_dir = None):
         '''Define instance variables.'''
         self.CAS_name = CAS_name
@@ -30,6 +31,7 @@ class Dimension_Properties:
     CG_Y : Y-coordinate of aerobody center of gravity in m. [float] 
     CG_Z : Z-coordinate of aerobody center of gravity in m. [float] 
     '''
+    
     def __init__(self, area = None, length = None, CG_X = None, CG_Y = None, CG_Z = None):
         '''Define instance variables.'''
         self.area = area #Stored in m^2
@@ -55,6 +57,7 @@ class Workflow_Properties:
     results_dir : Directory in which the numerical and post-processing results should be stored. [str]
     processes : Number of processes to use during simulations. [int]
     '''
+    
     def __init__(self, sol_method = None, CG = None, post = None, streamlines = None, results_dir = None, processes = None):
         '''Define instance variables.'''
         self.sol_method = sol_method #Either K-W or T-SST
@@ -86,6 +89,7 @@ class Simulation_Results:
     mom_pitch : Total aerodynamic moment experienced about y axis in Newton-metres. [str]
     mom_yaw : Total aerodynamic moment experienced about z axis in Newton-metres. [str]
     '''
+    
     def __init__(self, convergence = None, iterations = None, drag_tot = None, drag_comp = None, lift_tot = None, lift_comp = None, f_left = None, f_right = None, mom_roll = None, mom_pitch = None, mom_yaw = None):
         '''Define instance variables.'''
         self.convergence = convergence
@@ -112,6 +116,7 @@ class Simulation:
     workflow : Instance of Workflow_Properties object.
     results : Instance of Simulation_Results object.
     '''
+    
     def __init__(self, sim_name = None, mesh = None, dimension = None, workflow = None, results = None):
         '''Define instance variables.'''
         self.sim_name = sim_name
@@ -139,6 +144,7 @@ def param_extract(input_file):
     output_list : list
         List containing instances of Simulation object generated from each line of CSV file.
     '''
+    
     all_sim_param = open(input_file, 'r')
     next(all_sim_param)
     line = all_sim_param.readline()
@@ -188,6 +194,7 @@ def initialize_project(input_file):
     ---------------------
     None
     '''
+    
     all_sim_param = open(input_file, 'r')
 
     next(all_sim_param)
@@ -214,6 +221,7 @@ def results_dir(sim_list: list):
     ---------------------
     None
     '''
+    
     for simulation in sim_list:
         results_dir_check(simulation.workflow.results_dir, simulation.workflow.post, simulation.workflow.streamlines)
 
@@ -234,6 +242,7 @@ def results_dir_check(path, post: bool, streamlines: bool):
     ---------------------
     None
     '''
+    
     if (os.path.exists(path) == False):
         os.mkdir(path)
     
@@ -263,6 +272,7 @@ def fluent_sim_setup(sim_list):
     ---------------------
     None
     '''
+    
     komega = ["komega", "k-omega", "k-w", "kw"]
     tsst = ["t-sst", "tsst"]
 
@@ -286,6 +296,7 @@ def komega_setup(simulation):
     ---------------------
     None
     '''
+    
     template1 = GetTemplate(TemplateName="FLUENT")
     system1 = template1.CreateSystem()
     system1.DisplayText = simulation.sim_name
@@ -379,6 +390,7 @@ def tsst_setup(simulation):
     ---------------------
     None
     '''
+    
     template1 = GetTemplate(TemplateName="FLUENT")
     system1 = template1.CreateSystem()
     system1.DisplayText = simulation.sim_name
