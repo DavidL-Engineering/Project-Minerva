@@ -11,4 +11,3 @@ from resources import *
 # initialize_project(proj_params)
 
 # results_dir(sim_list, proj_params)
-
