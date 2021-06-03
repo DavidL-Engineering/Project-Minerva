@@ -261,7 +261,7 @@ def results_dir(sim_list: list, proj_params):
     for simulation in sim_list:
         results_dir_check(proj_params.results_dir, simulation.sim_name, simulation.workflow.post, simulation.workflow.streamlines)
 
-def results_dir_check(path, name: str, post: bool, streamlines: bool):
+def results_dir_check(path, name, post, streamlines):
     '''
     Checks if path to results folder exists and creates parent and sub-folders for indicated results folder and post-processing folders.
 
@@ -300,7 +300,7 @@ def results_dir_check(path, name: str, post: bool, streamlines: bool):
             os.mkdir(media_dir + "\\Streamline Animations")
     return
 
-def fluent_sim_setup(sim_list):
+def fluent_sim_setup(sim_list, processes):
     '''
     Checks solution method to be used and runs appropriate Fluent module setup.
 
@@ -319,12 +319,12 @@ def fluent_sim_setup(sim_list):
 
     for sim in sim_list:
         if sim.Workflow_Properties.sol_method.lower() in komega:
-            komega_setup(sim)
+            komega_setup(sim, processes)
         elif sim.Workflow_Properties.sol_method.lower() in tsst:
-            tsst_setup(sim)
+            tsst_setup(sim, processes)
 
 
-def komega_setup(simulation):
+def komega_setup(simulation, processes):
     '''
     Performs setup of Fluent module with K-W solution method.
 
@@ -343,7 +343,7 @@ def komega_setup(simulation):
     system1.DisplayText = simulation.sim_name
     setup1 = system1.GetContainer(ComponentName="Setup")
     fluentLauncherSettings1 = setup1.GetFluentLauncherSettings()
-    fluentLauncherSettings1.SetEntityProperties(Properties=Set(Dimension="ThreeD", EnvPath={}, RunParallel=True, NumberOfProcessors=simulation.Workflow_Properties.processes))
+    fluentLauncherSettings1.SetEntityProperties(Properties=Set(Dimension="ThreeD", EnvPath={}, RunParallel=True, NumberOfProcessors=processes))
     setup1.Edit()
     setup1.SendCommand(Command="(cx-gui-do cx-activate-item \"MenuBar*ImportSubMenu*Case...\")(cx-gui-do cx-set-file-dialog-entries \"Select File\" '( \"{}/{}}.cas\") \"All Case Files (*.cas* *.msh* *.MSH* )\")".format((simulation.Mesh_Properties.CAS_dir.replace(os.sep, '/')), simulation.Mesh_Properties.CAS_name))
     setup1.SendCommand(Command='(cx-gui-do cx-activate-item "General*Table1*ButtonBox1(Mesh)*PushButton1(Scale)")')
@@ -418,7 +418,7 @@ def komega_setup(simulation):
     Save(Overwrite=True)
 
 
-def tsst_setup(simulation):
+def tsst_setup(simulation, processes):
     '''
     Performs setup of Fluent module with T-SST solution method.
 
@@ -437,7 +437,7 @@ def tsst_setup(simulation):
     system1.DisplayText = simulation.sim_name
     setup1 = system1.GetContainer(ComponentName="Setup")
     fluentLauncherSettings1 = setup1.GetFluentLauncherSettings()
-    fluentLauncherSettings1.SetEntityProperties(Properties=Set(Dimension="ThreeD", EnvPath={}, RunParallel=True, NumberOfProcessors=simulation.Workflow_Properties.processes))
+    fluentLauncherSettings1.SetEntityProperties(Properties=Set(Dimension="ThreeD", EnvPath={}, RunParallel=True, NumberOfProcessors=processes))
     setup1.Edit()
     setup1.SendCommand(Command="(cx-gui-do cx-activate-item \"MenuBar*ImportSubMenu*Case...\")(cx-gui-do cx-set-file-dialog-entries \"Select File\" '( \"{}/{}}.cas\") \"All Case Files (*.cas* *.msh* *.MSH* )\")".format((simulation.Mesh_Properties.CAS_dir.replace(os.sep, '/')), simulation.Mesh_Properties.CAS_name))
     setup1.SendCommand(Command='(cx-gui-do cx-activate-item "General*Table1*ButtonBox1(Mesh)*PushButton1(Scale)")')
