@@ -54,22 +54,18 @@ class Workflow_Properties:
     CG : Specification of whether CG is entered and valid. [bool]
     post : Specification of whether post-processing is desired if simulation converges. [bool]
     streamlines : Specification of whether streamline animations are desired in post-processing. [bool]
-    results_dir : Directory in which the numerical and post-processing results should be stored. [str]
-    processes : Number of processes to use during simulations. [int]
     '''
     
-    def __init__(self, sol_method = None, CG = None, post = None, streamlines = None, results_dir = None, processes = None):
+    def __init__(self, sol_method = None, CG = None, post = None, streamlines = None):
         '''Define instance variables.'''
         self.sol_method = sol_method #Either K-W or T-SST
         self.CG = CG #Either True or False
         self.post = post #Either True or False
         self.streamlines = streamlines #True or False
-        self.results_dir = results_dir
-        self.processes = processes #integer
 
     def __str__(self):
         '''Print properties of Dimension_Properties object.'''
-        return "\n----WORKFLOW PROPERTIES----\nSolution method: {}\nCG: {}\nPost-Processing: {}\nStreamline Animations: {}\nResults located in: {}\nNumber of simulation processes: {}".format(self.sol_method, self.CG, self.post, self.streamlines, self.results_dir, self.processes)
+        return "\n----WORKFLOW PROPERTIES----\nSolution method: {}\nCG: {}\nPost-Processing: {}\nStreamline Animations: {}".format(self.sol_method, self.CG, self.post, self.streamlines)
 
 class Simulation_Results:
     '''
@@ -126,8 +122,31 @@ class Simulation:
         self.results = results
 
     def __str__(self):
-        '''Print properties of Simulation_Properties object.'''
+        '''Print properties of Simulation object.'''
         return ("\n--------SIMULATION PROPERTIES--------\nSimulation: {} {} {} {}\n".format(self.sim_name, self.mesh, self.dimension, self.workflow))
+
+class Project:
+    '''
+    Project object contains governing parameters to be used in project.
+
+    Instance Variables
+    ---------------------
+    proj_name : Name of ANSYS Workbench project. [str]
+    proj_dir : Directory in which the ANSYS Workbench project should be stored. [str]
+    results_dir : Directory in which the numerical and post-processing results should be stored. [str]
+    processes : Number of processes to use during simulations. [int]
+    '''
+
+    def __init__(self, proj_name = None, proj_dir = None, results_dir = None, processes = None):
+        '''Define instance variables.'''
+        self.proj_name = proj_name
+        self.proj_dir = proj_dir
+        self.results_dir = results_dir
+        self.processes = processes
+
+    def __str__(self):
+        '''Print properties of Project object'''
+        return("\n--------PROJECT PROPERTIES--------\nProject name: {}\nProject directory: {}\nResults directory: {}\nProcesses: {}".format(self.proj_name, self.proj_dir, self.results_dir, self.processes))
 
 def param_extract(input_file):
     '''
@@ -143,15 +162,22 @@ def param_extract(input_file):
     ---------------------
     output_list : list
         List containing instances of Simulation object generated from each line of CSV file.
+    project_parameters : Project
+        Instance of class Project generated from the CSV File.
     '''
     
     all_sim_param = open(input_file, 'r')
     next(all_sim_param)
-    line = all_sim_param.readline()
+    lines = all_sim_param.readlines()
+
+    proj_param_input = lines[0].split(",")
+    print(proj_param_input)
+    wb_proj_param = proj_param_extract(proj_param_input)
+    print(wb_proj_param)
 
     output_list = []
 
-    for line in all_sim_param:
+    for line in lines:
         line = line.split(",")
         sim_mesh = Mesh_Properties(line[1], line[2])
 
@@ -172,14 +198,35 @@ def param_extract(input_file):
         else:
             streamlines_bool = False
 
-        sim_workflow = Workflow_Properties(line[3], CG_bool, post_bool, streamlines_bool, line[12], line[13])
+        sim_workflow = Workflow_Properties(line[3], CG_bool, post_bool, streamlines_bool)
         sim_param = Simulation(line[0], sim_mesh, sim_dimensions, sim_workflow)
 
         output_list.append(sim_param)
+        print(sim_param)
 
     all_sim_param.close
 
-    return(output_list)
+    return(output_list, wb_proj_param)
+
+def proj_param_extract(line):
+    '''
+    Extracts global project parameters from list containing split string to instance of Project class.
+    List -> Project (class)
+
+    Parameters
+    ---------------------
+    line : List
+        List containing strings with project parameters.
+
+    Returns
+    ---------------------
+    proj_param : Project (class)
+        Instance of Project class containing parameters of Workbench project.
+    '''
+
+    proj_param = Project(line[13], line[14], line[15], line[16])
+
+    return(proj_param)
 
 def initialize_project(input_file):
     '''
