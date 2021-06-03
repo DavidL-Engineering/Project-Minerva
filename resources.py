@@ -171,9 +171,7 @@ def param_extract(input_file):
     lines = all_sim_param.readlines()
 
     proj_param_input = lines[0].split(",")
-    print(proj_param_input)
     wb_proj_param = proj_param_extract(proj_param_input)
-    print(wb_proj_param)
 
     output_list = []
 
@@ -202,7 +200,6 @@ def param_extract(input_file):
         sim_param = Simulation(line[0], sim_mesh, sim_dimensions, sim_workflow)
 
         output_list.append(sim_param)
-        print(sim_param)
 
     all_sim_param.close
 
@@ -228,34 +225,24 @@ def proj_param_extract(line):
 
     return(proj_param)
 
-def initialize_project(input_file):
+def initialize_project(project):
     '''
     Initializes ANSYS Workbench project.
 
     Parameters
     ---------------------
-    input_file : string
-        String containing name and file extension of CSV file with simulation parameters to be imported.
+    project : Project object
+        Instance of Project class containing project parameters.
 
     Returns
     ---------------------
     None
     '''
-    
-    all_sim_param = open(input_file, 'r')
+    proj_directory = project.proj_dir.replace(os.sep, '/')
 
-    next(all_sim_param)
-    line = all_sim_param.readline()
-    line = line.split(",")
-    # print(line)
+    Save(FilePath=("{}/{}.wbpj", proj_directory, project.proj_name), Overwrite=True)
 
-    proj_name = line[15]
-    proj_dir = line[16]
-    proj_dir = proj_dir.replace(os.sep, '/')
-
-    Save(FilePath=("{}/{}.wbpj", proj_dir, proj_name), Overwrite=True)
-
-def results_dir(sim_list: list):
+def results_dir(sim_list: list, proj_params):
     '''
     Runs results_dir_check on each simulation in a list of simulations.
 
@@ -263,6 +250,8 @@ def results_dir(sim_list: list):
     ---------------------
     sim_list : list
         List containing instances of Simulation object.
+    proj_params : Project objects
+        Instance of Project class containing project parameters.
 
     Returns
     ---------------------
@@ -270,9 +259,9 @@ def results_dir(sim_list: list):
     '''
     
     for simulation in sim_list:
-        results_dir_check(simulation.workflow.results_dir, simulation.workflow.post, simulation.workflow.streamlines)
+        results_dir_check(proj_params.results_dir, simulation.sim_name, simulation.workflow.post, simulation.workflow.streamlines)
 
-def results_dir_check(path, post: bool, streamlines: bool):
+def results_dir_check(path, name: str, post: bool, streamlines: bool):
     '''
     Checks if path to results folder exists and creates parent and sub-folders for indicated results folder and post-processing folders.
 
@@ -293,8 +282,13 @@ def results_dir_check(path, post: bool, streamlines: bool):
     if (os.path.exists(path) == False):
         os.mkdir(path)
     
+    sim_path = os.path.join(path, name)
+    
     if post:
-        media_dir = os.path.join(path, "Media Files")
+        sim_path = os.path.join(path, name)
+        if (os.path.exists(sim_path) == False):
+            os.mkdir(sim_path)
+        media_dir = os.path.join(sim_path, "Media Files")
         if (os.path.exists(media_dir) == False):
             os.mkdir(media_dir)
         media_subdir = ["\\3D Cp Contour", "\\Pressure Contour", "\\TKE Contour", "\\Wall Shear Streamline"]

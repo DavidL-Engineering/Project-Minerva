@@ -4,8 +4,8 @@
 
 from resources import *
 
-(sim_list, project_parameters) = param_extract("Simulation Parameters.csv")
+(sim_list, proj_params) = param_extract("Simulation Parameters.csv")
 
 # initialize_project("Simulation Parameters.csv")
 
-# results_dir(sim_list)
+# results_dir(sim_list, proj_params)
