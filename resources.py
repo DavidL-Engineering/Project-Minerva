@@ -2277,6 +2277,7 @@ def post_plots(simulation, index, proj_params):
 
     return
 
+'''
 def post_streamlines(simulation, index, proj_params):
     if index==0:
         module = "POST"
@@ -2287,4 +2288,5 @@ def post_streamlines(simulation, index, proj_params):
     media_dir = os.path.join(sim_path, "Media Files")
     animate_dir = os.path.join(media_dir, "\\Streamline Animations").replace(os.sep, '/')
 
-    
+TO BE FINISHED
+'''
