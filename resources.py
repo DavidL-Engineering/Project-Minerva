@@ -1,4 +1,5 @@
 import os
+from datetime import date
 
 class Mesh_Properties:
     '''
@@ -86,7 +87,7 @@ class Simulation_Results:
     mom_yaw : Total aerodynamic moment experienced about z axis in Newton-metres. [str]
     '''
     
-    def __init__(self, convergence = None, iterations = None, drag_tot = None, drag_comp = None, lift_tot = None, lift_comp = None, f_left = None, f_right = None, mom_roll = None, mom_pitch = None, mom_yaw = None):
+    def __init__(self, convergence = None, iterations = None, drag_tot = None, drag_comp = None, lift_tot = None, lift_comp = None, f_left = None, f_right = None, mom_roll = None, mom_pitch = None, mom_yaw = None, cop = None):
         '''Define instance variables.'''
         self.convergence = convergence
         self.iterations = iterations
@@ -99,6 +100,7 @@ class Simulation_Results:
         self.mom_roll = mom_roll
         self.mom_pitch = mom_pitch
         self.mom_yaw = mom_yaw
+        self.cop = cop
 
 class Simulation:
     '''
@@ -197,7 +199,7 @@ def param_extract(input_file):
             streamlines_bool = False
 
         sim_workflow = Workflow_Properties(line[3], CG_bool, post_bool, streamlines_bool)
-        sim_param = Simulation(line[0], sim_mesh, sim_dimensions, sim_workflow)
+        sim_param = Simulation(line[0], sim_mesh, sim_dimensions, sim_workflow, Simulation_Results())
 
         output_list.append(sim_param)
 
@@ -242,7 +244,9 @@ def initialize_project(project):
 
     Save(FilePath=("{}/{}.wbpj", proj_directory, project.proj_name), Overwrite=True)
 
-def results_dir(sim_list: list, proj_params):
+    return
+
+def results_dir(sim_list, proj_params):
     '''
     Runs results_dir_check on each simulation in a list of simulations.
 
@@ -260,6 +264,8 @@ def results_dir(sim_list: list, proj_params):
     
     for simulation in sim_list:
         results_dir_check(proj_params.results_dir, simulation.sim_name, simulation.workflow.post, simulation.workflow.streamlines)
+    
+    return
 
 def results_dir_check(path, name, post, streamlines):
     '''
@@ -323,6 +329,7 @@ def fluent_sim_setup(sim_list, processes):
         elif sim.Workflow_Properties.sol_method.lower() in tsst:
             tsst_setup(sim, processes)
 
+    return
 
 def komega_setup(simulation, processes):
     '''
@@ -332,6 +339,8 @@ def komega_setup(simulation, processes):
     ---------------------
     simulation : Simulation object
         Instance of Simulation object.
+    processes : int
+        Integer containing number of parallel processes to use in simulation.
 
     Returns
     ---------------------
@@ -417,6 +426,8 @@ def komega_setup(simulation, processes):
     setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*FileMenu*Close Fluent")')
     Save(Overwrite=True)
 
+    return
+
 
 def tsst_setup(simulation, processes):
     '''
@@ -426,6 +437,8 @@ def tsst_setup(simulation, processes):
     ---------------------
     simulation : Simulation object
         Instance of Simulation object.
+    processes : int
+        Integer containing number of parallel processes to use in simulation.
 
     Returns
     ---------------------
@@ -508,3 +521,226 @@ def tsst_setup(simulation, processes):
     setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Solution Initialization*Table1*Frame11*PushButton2(Initialize)")')
     setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*FileMenu*Close Fluent")')
     Save(Overwrite=True)
+
+    return
+
+def convergence_status(sim_list, proj_params):
+    '''
+    Performs batch detection of convergence status on all simulations in sim_list.
+
+    Parameters
+    ---------------------
+    sim_list : List 
+        List containing Simulation objects.
+    proj_params : Project object
+        Instance of Project class containing project parameters.
+
+    Returns
+    ---------------------
+    None
+    '''
+    
+    wb_files_dir = os.path.join(proj_params.proj_dir, proj_params.proj_name + "_files").replace(os.sep, '/')
+
+    for i in range(len(sim_list)):
+        if i==0:
+            flu_dir = "FLU"
+        else:
+            flu_dir = "FLU-{}".format(i)
+        status_file = open("{}/progress_files/dp0/{}/Fluent/Solution.trn".format(wb_files_dir, flu_dir), 'r')
+        if "solution is converged" in status_file.read():
+            sim_list[i].results.convergence = "Converged"
+            print("Converged")
+        else:
+            sim_list[i].results.convergence = "Diverged or Error"
+            print("Diverged or Error")
+    
+    return
+
+def results_extract(sim_list, proj_params):
+    '''
+    Performs batch execution of fluent_results_export on simulations that have converged.
+
+    Parameters
+    ---------------------
+    sim_list : List 
+        List containing Simulation objects.
+    proj_params : Project object
+        Instance of Project class containing project parameters.
+
+    Returns
+    ---------------------
+    None
+    '''
+    for i in range(len(sim_list)):
+        if sim_list[i].results.convergence == "Converged":
+            fluent_results_export(sim_list[i], i, proj_params)
+            fluent_results_aggregator(sim_list[i], i, proj_params)
+    
+    results_formatter(sim_list, proj_params)
+
+    return
+
+def fluent_results_export(simulation, index, proj_params):
+    '''
+    Exports results from a given Fluent simulation into .txt files.
+
+    Parameters
+    ---------------------
+    simulation : Simulation object
+        Instance of Simulation object.
+    index : int
+        Integer of current index of converged simulation.
+    proj_params : Project object
+        Instance of Project class containing project parameters.
+
+    Returns
+    ---------------------
+    None
+    '''
+
+    if index==0:
+        module = "FLU"
+        flu_dir = "FLU"
+    else:
+        module = "FLU {}".format(index)
+        flu_dir = "FLU-{}".format(index)
+    
+    raw_results_dir = os.path.join(proj_params.results_dir, simulation.sim_name + "\\Raw Results").replace(os.sep, '/')
+    wb_files_dir = os.path.join(proj_params.proj_dir, proj_params.proj_name + "_files").replace(os.sep, '/')
+    
+    system1 = GetSystem(Name=module)
+    solution1 = system1.GetContainer(ComponentName="Solution")
+    solution1.Edit()
+    setup1 = system1.GetContainer(ComponentName="Setup")
+    setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*List_Tree1" (list "Results|Reports|Forces"))')
+    setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*List_Tree1" (list "Results|Reports|Forces"))(cx-gui-do cx-activate-item "NavigationPane*List_Tree1")')
+    setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*List_Tree1\" (list \"Results|Reports|Forces\"))(cx-gui-do cx-set-list-selections \"Force Reports*List2(Wall Zones)\" '( 0 2))(cx-gui-do cx-activate-item \"Force Reports*List2(Wall Zones)\")(cx-gui-do cx-set-list-selections \"Force Reports*List2(Wall Zones)\" '( 0))(cx-gui-do cx-activate-item \"Force Reports*List2(Wall Zones)\")")
+    setup1.SendCommand(Command="(cx-gui-do cx-activate-item \"Force Reports*PanelButtons*PushButton4(Write)\")(cx-gui-do cx-set-file-dialog-entries \"Select File\" '( \"{}}/drag{}.txt\") \"All Files (*)\")".format(raw_results_dir, index))
+    setup1.SendCommand(Command="(cx-gui-do cx-set-real-entry-list \"Force Reports*Table1*Frame2*Frame1(Direction Vector)*RealEntry1(X)\" '( 0))(cx-gui-do cx-set-real-entry-list \"Force Reports*Table1*Frame2*Frame1(Direction Vector)*RealEntry3(Z)\" '( 1))")
+    setup1.SendCommand(Command="(cx-gui-do cx-activate-item \"Force Reports*PanelButtons*PushButton4(Write)\")(cx-gui-do cx-set-file-dialog-entries \"Select File\" '( \"lift{}.txt\") \"All Files (*)\")".format(index))
+    setup1.SendCommand(Command="(cx-gui-do cx-set-toggle-button2 \"Force Reports*Table1*ToggleBox1(Options)*Moments\" #t)(cx-gui-do cx-activate-item \"Force Reports*Table1*ToggleBox1(Options)*Moments\")(cx-gui-do cx-set-real-entry-list \"Force Reports*Table1*Frame2*Frame2(Moment Center)*RealEntry1(X)\" '({}))(cx-gui-do cx-set-real-entry-list \"Force Reports*Table1*Frame2*Frame2(Moment Center)*RealEntry2(Y)\" '({}))(cx-gui-do cx-set-real-entry-list \"Force Reports*Table1*Frame2*Frame2(Moment Center)*RealEntry3(Z)\" '({}))".format(simulation.dimension.CG_X, simulation.dimension.CG_Y, simulation.dimension.CG_Z))
+    setup1.SendCommand(Command="(cx-gui-do cx-activate-item \"Force Reports*PanelButtons*PushButton4(Write)\")(cx-gui-do cx-set-file-dialog-entries \"Select File\" '( \"roll_moment{}.txt\") \"All Files (*)\")".format(index))
+    setup1.SendCommand(Command="(cx-gui-do cx-set-real-entry-list \"Force Reports*Table1*Frame2*Frame3(Moment Axis)*RealEntry1(X)\" '( 0))(cx-gui-do cx-set-real-entry-list \"Force Reports*Table1*Frame2*Frame3(Moment Axis)*RealEntry2(Y)\" '( 1))")
+    setup1.SendCommand(Command="(cx-gui-do cx-activate-item \"Force Reports*PanelButtons*PushButton4(Write)\")(cx-gui-do cx-set-file-dialog-entries \"Select File\" '( \"pitch_moment{}.txt\") \"All Files (*)\")".format(index))
+    setup1.SendCommand(Command="(cx-gui-do cx-set-real-entry-list \"Force Reports*Table1*Frame2*Frame3(Moment Axis)*RealEntry2(Y)\" '( 0))(cx-gui-do cx-set-real-entry-list \"Force Reports*Table1*Frame2*Frame3(Moment Axis)*RealEntry3(Z)\" '( 1))")
+    setup1.SendCommand(Command="(cx-gui-do cx-activate-item \"Force Reports*PanelButtons*PushButton4(Write)\")(cx-gui-do cx-set-file-dialog-entries \"Select File\" '( \"yaw_moment{}.txt\") \"All Files (*)\")".format(index))
+    setup1.SendCommand(Command="(cx-gui-do cx-set-real-entry-list \"Force Reports*Table1*Frame2*Frame3(Moment Axis)*RealEntry3(Z)\" '( 0))(cx-gui-do cx-set-real-entry-list \"Force Reports*Table1*Frame2*Frame3(Moment Axis)*RealEntry1(X)\" '( 1))(cx-gui-do cx-set-toggle-button2 \"Force Reports*Table1*ToggleBox1(Options)*Forces\" #t)(cx-gui-do cx-activate-item \"Force Reports*Table1*ToggleBox1(Options)*Forces\")(cx-gui-do cx-set-real-entry-list \"Force Reports*Table1*Frame2*Frame1(Direction Vector)*RealEntry3(Z)\" '( 0))(cx-gui-do cx-set-real-entry-list \"Force Reports*Table1*Frame2*Frame1(Direction Vector)*RealEntry2(Y)\" '( -1))")
+    setup1.SendCommand(Command="(cx-gui-do cx-activate-item \"Force Reports*PanelButtons*PushButton4(Write)\")(cx-gui-do cx-set-file-dialog-entries \"Select File\" '( \"force_left{}.txt\") \"All Files (*)\")".format(index))
+    setup1.SendCommand(Command="(cx-gui-do cx-set-real-entry-list \"Force Reports*Table1*Frame2*Frame1(Direction Vector)*RealEntry2(Y)\" '( 1))")
+    setup1.SendCommand(Command="(cx-gui-do cx-activate-item \"Force Reports*PanelButtons*PushButton4(Write)\")(cx-gui-do cx-set-file-dialog-entries \"Select File\" '( \"force_right{}.txt\") \"All Files (*)\")".format(index))
+    setup1.SendCommand(Command='(cx-gui-do cx-set-toggle-button2 "Force Reports*Table1*ToggleBox1(Options)*Center of Pressure" #t)(cx-gui-do cx-activate-item "Force Reports*Table1*ToggleBox1(Options)*Center of Pressure")')
+    setup1.SendCommand(Command="(cx-gui-do cx-activate-item \"Force Reports*PanelButtons*PushButton4(Write)\")(cx-gui-do cx-set-file-dialog-entries \"Select File\" '( \"cp_x_0m_{}.txt\") \"All Files (*)\")".format(index))
+    setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Force Reports*PanelButtons*PushButton2(Cancel)")')
+    setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*FileMenu*Close Fluent")')
+    
+    
+    iter_file = open("{}/dp0/{}/Fluent/drag-rfile.out".format(wb_files_dir, flu_dir), 'r')
+    iter_lines = iter_file.readlines()
+    iter_data = iter_lines[len(iter_lines)-1]
+    
+
+    output = open("{}/iter{}.txt".format(raw_results_dir, index), 'w')
+    output.write(iter_data)
+    output.close()
+    iter_file.close()
+
+    return
+
+def fluent_results_aggregator(simulation, index, proj_params):
+    '''
+    Aggregates exported fluent results and imports into their Simulation_Results object.
+
+    Parameters
+    ---------------------
+    simulation : Simulation object
+        Instance of Simulation object.
+    index : int
+        Integer of current index of converged simulation.
+    proj_params : Project object
+        Instance of Project class containing project parameters.
+
+    Returns
+    ---------------------
+    None
+    '''
+
+    raw_results_dir = os.path.join(proj_params.results_dir, simulation.sim_name + "\\Raw Results").replace(os.sep, '/')
+
+    cop_file = open("{}/cp_x_0m_{}.txt".format(raw_results_dir, index), 'r')
+    drag_file = open("{}/drag{}.txt".format(raw_results_dir, index), 'r')
+    lift_file = open("{}/lift{}.txt".format(raw_results_dir, index), 'r')
+    iter_file = open("{}/iter{}.txt".format(raw_results_dir, index), 'r')
+    f_left_file = open("{}/f_left{}.txt".format(raw_results_dir, index), 'r')
+    f_right_file = open("{}/f_right{}.txt".format(raw_results_dir, index), 'r')
+    pitch_file = open("{}/pitch_moment{}.txt".format(raw_results_dir, index), 'r')
+    roll_file = open("{}/roll_moment{}.txt".format(raw_results_dir, index), 'r')
+    yaw_file = open("{}/yaw_moment{}.txt".format(raw_results_dir, index), 'r')
+
+    cop_all_data = cop_file.readlines()
+    drag_all_data = drag_file.readlines()
+    lift_all_data = lift_file.readlines()
+    iter_all_data = iter_file.readlines()
+    f_left_all_data = f_left_file.readlines()
+    f_right_all_data = f_right_file.readlines()
+    pitch_all_data = pitch_file.readlines()
+    roll_all_data = roll_file.readlines()
+    yaw_all_data = yaw_file.readlines()
+
+    # cop values are on line 5
+    # drag values are on line 13
+    # lift values are on line 13
+    # iter values are on line 1
+    # f_left values are on line 13
+    # f_right values are on line 13
+    # pitch moment values are on line 13
+    # roll moment values are on line 13
+    # yaw moment values are on line 13
+
+    cop_line_data = cop_all_data[4].split()
+    drag_line_data = drag_all_data[12].split()
+    lift_line_data = lift_all_data[12].split()
+    iter_line_data = iter_all_data[0].split()
+    f_left_line_data = f_left_all_data[12].split()
+    f_right_line_data = f_right_all_data[12].split()
+    pitch_line_data = pitch_all_data[12].split()
+    roll_line_data = roll_all_data[12].split()
+    yaw_line_data = yaw_all_data[12].split()
+
+    cop_values = str(cop_line_data[1]) + " " + str(cop_line_data[2])
+    drag_comp_values = str(drag_line_data[1]) + " " + str(drag_line_data[2])
+    drag_tot_value = str(drag_line_data[3])
+    lift_comp_values = str(lift_line_data[1] + " " + lift_line_data[2])
+    lift_tot_value = str(lift_line_data[3])
+    iter_value = str(iter_line_data[0])
+    f_left_value = str(f_left_line_data[3])
+    f_right_value = str(f_right_line_data[3])
+    pitch_value = str(pitch_line_data[3])
+    roll_value = str(roll_line_data[3])
+    yaw_value =str(yaw_line_data[3])
+
+    simulation.results.iterations = iter_value
+    simulation.results.drag_tot = drag_tot_value
+    simulation.results.drag_comp = drag_comp_values
+    simulation.results.lift_tot = lift_tot_value
+    simulation.results.lift_comp = lift_comp_values
+    simulation.results.f_left = f_left_value
+    simulation.results.f_right = f_right_value
+    simulation.results.mom_roll = roll_value
+    simulation.results.mom_pitch = pitch_value
+    simulation.results.mom_yaw = yaw_value
+    simulation.results.cop = cop_values
+
+def results_formatter(sim_list, proj_params):
+    export_directory = os.path.join(proj_params.results_dir).replace(os.sep, '/')
+
+    current_date = date.today().strftime("%d/%m/%Y")
+
+    with open("{}/Simulation Results.csv".format(export_directory), 'w') as csvfile:
+        csvfile.write("Simulation Name,.CAS File Name,Date,Number of Iterations,A. Drag [N] (Total),B. Drag [N]: Pressure + Viscous,A. Lift [N] (Total),B. Lift [N]: Pressure + Viscous,Force Left [N] (Total),Force Right [N] (Total),Roll Moment [N-m] (axis = [1,0,0]),Pitch Moment [N-m] (axis = [0,1,0]),Yaw Moment [N-m] (axis = [0,0,1]),Center of Pressure (x=0 [m]),Status\n")
+        for i in range(len(sim_list)):
+            if sim_list[i].results.convergence == "Converged":
+                csvfile.write("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(sim_list[i].sim_name, sim_list[i].mesh.CAS_name, sim_current_date, sim_list[i].results.iterations, sim_list[i].results.drag_tot, sim_list[i].results.drag_comp, sim_list[i].results.lift_tot, sim_list[i].results.lift_comp, sim_list[i].results.f_left, sim_list[i].results.f_right, sim_list[i].results.mom_roll, sim_list[i].results.mom_pitch, sim_list[i].results.mom_yaw, sim_list[i].results.cop, sim_list[i].results.convergence))
+            else:
+                csvfile.write("{},{},{},,,,,,,,,,,,{}\n".format(sim_list[i].sim_name, sim_list[i].mesh.CAS_name, current_date, sim_list[i].results.convergence))
+        csvfile.close()

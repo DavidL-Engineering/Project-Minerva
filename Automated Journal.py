@@ -6,6 +6,9 @@ from resources import *
 
 (sim_list, proj_params) = param_extract("Simulation Parameters.csv")
 
-# initialize_project("Simulation Parameters.csv")
+# fluent_sim_setup(sim_list, proj_params.processes)
+
+# initialize_project(proj_params)
 
 # results_dir(sim_list, proj_params)
+
