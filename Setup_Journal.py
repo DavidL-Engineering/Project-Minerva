@@ -2293,4 +2293,4 @@ def post_plots(simulation, index, proj_params):
 
 initialize_project(proj_params)
 
-# fluent_sim_setup(sim_list, proj_params.processes)
+fluent_sim_setup(sim_list, proj_params.processes)
