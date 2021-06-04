@@ -6,9 +6,7 @@ import os
 from datetime import date
 
 abspath = os.path.abspath(__file__)
-print(abspath)
 dir = os.path.dirname(abspath)
-print(dir)
 os.chdir(dir)
 
 class Mesh_Properties:
@@ -336,9 +334,9 @@ def fluent_sim_setup(sim_list, processes):
     tsst = ["t-sst", "tsst"]
 
     for sim in sim_list:
-        if sim.Workflow_Properties.sol_method.lower() in komega:
+        if sim.workflow.sol_method.lower() in komega:
             komega_setup(sim, processes)
-        elif sim.Workflow_Properties.sol_method.lower() in tsst:
+        elif sim.workflow.sol_method.lower() in tsst:
             tsst_setup(sim, processes)
 
     return
@@ -366,7 +364,7 @@ def komega_setup(simulation, processes):
     fluentLauncherSettings1 = setup1.GetFluentLauncherSettings()
     fluentLauncherSettings1.SetEntityProperties(Properties=Set(Dimension="ThreeD", EnvPath={}, RunParallel=True, NumberOfProcessors=processes))
     setup1.Edit()
-    setup1.SendCommand(Command="(cx-gui-do cx-activate-item \"MenuBar*ImportSubMenu*Case...\")(cx-gui-do cx-set-file-dialog-entries \"Select File\" '( \"{}/{}.cas\") \"All Case Files (*.cas* *.msh* *.MSH* )\")".format((simulation.Mesh_Properties.CAS_dir.replace(os.sep, '/')), simulation.Mesh_Properties.CAS_name))
+    setup1.SendCommand(Command="(cx-gui-do cx-activate-item \"MenuBar*ImportSubMenu*Case...\")(cx-gui-do cx-set-file-dialog-entries \"Select File\" '( \"{}/{}.cas\") \"All Case Files (*.cas* *.msh* *.MSH* )\")".format((simulation.mesh.CAS_dir.replace(os.sep, '/')), simulation.mesh.CAS_name))
     setup1.SendCommand(Command='(cx-gui-do cx-activate-item "General*Table1*ButtonBox1(Mesh)*PushButton1(Scale)")')
     setup1.SendCommand(Command="(cx-gui-do cx-set-list-selections \"Scale Mesh*Table1*Table2(Scaling)*DropDownList2(Mesh Was Created In)\" '( 3))")
     setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Scale Mesh*Table1*Table2(Scaling)*DropDownList2(Mesh Was Created In)")')
@@ -397,8 +395,8 @@ def komega_setup(simulation, processes):
     setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*List_Tree1" (list "Setup|Reference Values"))(cx-gui-do cx-activate-item "NavigationPane*List_Tree1")')
     setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*List_Tree1\" (list \"Setup|Reference Values\"))(cx-gui-do cx-set-list-selections \"Reference Values*DropDownList1(Compute from)\" '( 3))")
     setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Reference Values*DropDownList1(Compute from)")')
-    setup1.SendCommand(Command="(cx-gui-do cx-set-real-entry-list \"Reference Values*Table2(Reference Values)*RealEntry1(Area)\" '( {}}))(cx-gui-do cx-activate-item \"Reference Values*Table2(Reference Values)*RealEntry1(Area)\")".format(simulation.Dimension_Properties.area))
-    setup1.SendCommand(Command="(cx-gui-do cx-set-real-entry-list \"Reference Values*Table2(Reference Values)*RealEntry5(Length)\" '( {}}))(cx-gui-do cx-activate-item \"Reference Values*Table2(Reference Values)*RealEntry5(Length)\")".format(simulation.Dimension_Properties.length))
+    setup1.SendCommand(Command="(cx-gui-do cx-set-real-entry-list \"Reference Values*Table2(Reference Values)*RealEntry1(Area)\" '({}))(cx-gui-do cx-activate-item \"Reference Values*Table2(Reference Values)*RealEntry1(Area)\")".format(simulation.Dimension_Properties.area))
+    setup1.SendCommand(Command="(cx-gui-do cx-set-real-entry-list \"Reference Values*Table2(Reference Values)*RealEntry5(Length)\" '({}))(cx-gui-do cx-activate-item \"Reference Values*Table2(Reference Values)*RealEntry5(Length)\")".format(simulation.Dimension_Properties.length))
     setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*List_Tree1" (list "Solution|Methods"))')
     setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*List_Tree1" (list "Solution|Methods"))(cx-gui-do cx-activate-item "NavigationPane*List_Tree1")')
     setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*List_Tree1\" (list \"Solution|Methods\"))(cx-gui-do cx-set-list-selections \"Solution Methods*Table1*Table2(Pressure-Velocity Coupling)*DropDownList2(Scheme)\" '( 3))")
@@ -429,7 +427,7 @@ def komega_setup(simulation, processes):
     setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*List_Tree1" (list "Solution|Run Calculation"))(cx-gui-do cx-activate-item "NavigationPane*List_Tree1")')
     setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*List_Tree1\" (list \"Solution|Run Calculation\"))(cx-gui-do cx-set-list-selections \"Run Calculation*Table1*Table2(Pseudo Transient Settings)*Table1(Fluid Time Scale)*Table1*DropDownList2(Length Scale Method)\" '( 2))")
     setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Run Calculation*Table1*Table2(Pseudo Transient Settings)*Table1(Fluid Time Scale)*Table1*DropDownList2(Length Scale Method)")')
-    setup1.SendCommand(Command="(cx-gui-do cx-set-real-entry-list \"Run Calculation*Table1*Table2(Pseudo Transient Settings)*Table1(Fluid Time Scale)*Table3*RealEntry3(Length Scale)\" '({}))(cx-gui-do cx-activate-item \"Run Calculation*Table1*Table2(Pseudo Transient Settings)*Table1(Fluid Time Scale)*Table3*RealEntry3(Length Scale)\")".format(simulation.Dimension_Properties.length))
+    setup1.SendCommand(Command="(cx-gui-do cx-set-real-entry-list \"Run Calculation*Table1*Table2(Pseudo Transient Settings)*Table1(Fluid Time Scale)*Table3*RealEntry3(Length Scale)\" '( 5.0005))(cx-gui-do cx-activate-item \"Run Calculation*Table1*Table2(Pseudo Transient Settings)*Table1(Fluid Time Scale)*Table3*RealEntry3(Length Scale)\")")
     setup1.SendCommand(Command='(cx-gui-do cx-set-integer-entry "Run Calculation*Table1*Table3(Parameters)*Table1*Table1*IntegerEntry1(Number of Iterations)" 600)(cx-gui-do cx-activate-item "Run Calculation*Table1*Table3(Parameters)*Table1*Table1*IntegerEntry1(Number of Iterations)")')
     setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*List_Tree1" (list "Solution|Initialization"))')
     setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*List_Tree1" (list "Solution|Initialization"))(cx-gui-do cx-activate-item "NavigationPane*List_Tree1")')
@@ -464,7 +462,7 @@ def tsst_setup(simulation, processes):
     fluentLauncherSettings1 = setup1.GetFluentLauncherSettings()
     fluentLauncherSettings1.SetEntityProperties(Properties=Set(Dimension="ThreeD", EnvPath={}, RunParallel=True, NumberOfProcessors=processes))
     setup1.Edit()
-    setup1.SendCommand(Command="(cx-gui-do cx-activate-item \"MenuBar*ImportSubMenu*Case...\")(cx-gui-do cx-set-file-dialog-entries \"Select File\" '( \"{}/{}.cas\") \"All Case Files (*.cas* *.msh* *.MSH* )\")".format((simulation.Mesh_Properties.CAS_dir.replace(os.sep, '/')), simulation.Mesh_Properties.CAS_name))
+    setup1.SendCommand(Command="(cx-gui-do cx-activate-item \"MenuBar*ImportSubMenu*Case...\")(cx-gui-do cx-set-file-dialog-entries \"Select File\" '( \"{}/{}.cas\") \"All Case Files (*.cas* *.msh* *.MSH* )\")".format((simulation.mesh.CAS_dir.replace(os.sep, '/')), simulation.mesh.CAS_name))
     setup1.SendCommand(Command='(cx-gui-do cx-activate-item "General*Table1*ButtonBox1(Mesh)*PushButton1(Scale)")')
     setup1.SendCommand(Command="(cx-gui-do cx-set-list-selections \"Scale Mesh*Table1*Table2(Scaling)*DropDownList2(Mesh Was Created In)\" '( 3))")
     setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Scale Mesh*Table1*Table2(Scaling)*DropDownList2(Mesh Was Created In)")')
