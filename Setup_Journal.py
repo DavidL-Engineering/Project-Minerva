@@ -5,6 +5,12 @@ SetScriptVersion(Version="20.1.164")
 import os
 from datetime import date
 
+abspath = os.path.abspath(__file__)
+print(abspath)
+dir = os.path.dirname(abspath)
+print(dir)
+os.chdir(dir)
+
 class Mesh_Properties:
     '''
     Mesh_Properties object stores the name and directory of the exported .CAS file containing the mesh.
@@ -2283,16 +2289,8 @@ def post_plots(simulation, index, proj_params):
 
     return
 
-'''
-def post_streamlines(simulation, index, proj_params):
-    if index==0:
-        module = "POST"
-    else:
-        module = "POST {}".format(index)
-    
-    sim_path = os.path.join(proj_params.results_dir, simulation.sim_name)
-    media_dir = os.path.join(sim_path, "Media Files")
-    animate_dir = os.path.join(media_dir, "\\Streamline Animations").replace(os.sep, '/')
+(sim_list, proj_params) = param_extract("Simulation Parameters.csv")
 
-TO BE FINISHED
-'''
+initialize_project(proj_params)
+
+# fluent_sim_setup(sim_list, proj_params.processes)
