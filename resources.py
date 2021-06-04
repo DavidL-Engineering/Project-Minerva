@@ -210,7 +210,6 @@ def param_extract(input_file):
         sim_param = Simulation(line[0], sim_mesh, sim_dimensions, sim_workflow, Simulation_Results())
 
         output_list.append(sim_param)
-        print(sim_param)
 
     all_sim_param.close
 
@@ -233,7 +232,6 @@ def proj_param_extract(line):
     '''
 
     proj_param = Project(line[14], line[15], line[16], line[17])
-    print(proj_param)
 
     return(proj_param)
 
