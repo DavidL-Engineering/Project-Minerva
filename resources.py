@@ -618,7 +618,8 @@ def convergence_status(sim_list, proj_params):
 
     Returns
     ---------------------
-    None
+    sim_list : List 
+        List containing Simulation objects.
     '''
     
     wb_files_dir = os.path.join(proj_params.proj_dir, proj_params.proj_name + "_files").replace(os.sep, '/')
@@ -631,12 +632,10 @@ def convergence_status(sim_list, proj_params):
         status_file = open("{}/progress_files/dp0/{}/Fluent/Solution.trn".format(wb_files_dir, flu_dir), 'r')
         if "solution is converged" in status_file.read():
             sim_list[i].results.convergence = "Converged"
-            print("Converged")
         else:
             sim_list[i].results.convergence = "Diverged or Error"
-            print("Diverged or Error")
     
-    return
+    return(sim_list)
 
 def results_extract(sim_list, proj_params):
     '''
@@ -656,7 +655,7 @@ def results_extract(sim_list, proj_params):
     for i in range(len(sim_list)):
         if sim_list[i].results.convergence == "Converged":
             fluent_results_export(sim_list[i], i, proj_params)
-            fluent_results_aggregator(sim_list[i], i, proj_params)
+            sim_list[i] = fluent_results_aggregator(sim_list[i], i, proj_params)
     
     results_formatter(sim_list, proj_params)
 
@@ -743,7 +742,8 @@ def fluent_results_aggregator(simulation, index, proj_params):
 
     Returns
     ---------------------
-    None
+    simulation : Simulation object
+        Instance of Simulation object.
     '''
 
     raw_results_dir = os.path.join(proj_params.results_dir, simulation.sim_name + "\\Raw Results").replace(os.sep, '/')
@@ -812,6 +812,8 @@ def fluent_results_aggregator(simulation, index, proj_params):
     simulation.results.mom_yaw = yaw_value
     simulation.results.cop = cop_values
 
+    return(simulation)
+
 def results_formatter(sim_list, proj_params):
     export_directory = os.path.join(proj_params.results_dir).replace(os.sep, '/')
 
@@ -820,10 +822,11 @@ def results_formatter(sim_list, proj_params):
     with open("{}/Simulation Results.csv".format(export_directory), 'w') as csvfile:
         csvfile.write("Simulation Name,.CAS File Name,Date,Number of Iterations,A. Drag [N] (Total),B. Drag [N]: Pressure + Viscous,A. Lift [N] (Total),B. Lift [N]: Pressure + Viscous,Force Left [N] (Total),Force Right [N] (Total),Roll Moment [N-m] (axis = [1,0,0]),Pitch Moment [N-m] (axis = [0,1,0]),Yaw Moment [N-m] (axis = [0,0,1]),Center of Pressure (x=0 [m]),Status\n")
         for i in range(len(sim_list)):
-            if sim_list[i].results.convergence == "Converged":
-                csvfile.write("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(sim_list[i].sim_name, sim_list[i].mesh.CAS_name, sim_current_date, sim_list[i].results.iterations, sim_list[i].results.drag_tot, sim_list[i].results.drag_comp, sim_list[i].results.lift_tot, sim_list[i].results.lift_comp, sim_list[i].results.f_left, sim_list[i].results.f_right, sim_list[i].results.mom_roll, sim_list[i].results.mom_pitch, sim_list[i].results.mom_yaw, sim_list[i].results.cop, sim_list[i].results.convergence))
+            simulation = sim_list[i]
+            if simulation.results.convergence == "Converged":
+                csvfile.write("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(simulation.sim_name, simulation.mesh.CAS_name, current_date, simulation.results.iterations, simulation.results.drag_tot, simulation.results.drag_comp, simulation.results.lift_tot, simulation.results.lift_comp, simulation.results.f_left, simulation.results.f_right, simulation.results.mom_roll, simulation.results.mom_pitch, simulation.results.mom_yaw, simulation.results.cop, simulation.results.convergence))
             else:
-                csvfile.write("{},{},{},,,,,,,,,,,,{}\n".format(sim_list[i].sim_name, sim_list[i].mesh.CAS_name, current_date, sim_list[i].results.convergence))
+                csvfile.write("{},{},{},,,,,,,,,,,,{}\n".format(simulation.sim_name, simulation.mesh.CAS_name, current_date, simulation.results.convergence))
         csvfile.close()
 
 def post_processing(sim_list, proj_params):
