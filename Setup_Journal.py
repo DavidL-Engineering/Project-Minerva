@@ -210,7 +210,7 @@ def param_extract(input_file):
         else:
             streamlines_bool = False
 
-        sim_workflow = Workflow_Properties(line[5], CG_bool, post_bool, streamlines_bool)
+        sim_workflow = Workflow_Properties(line[4], CG_bool, post_bool, streamlines_bool)
         sim_param = Simulation(line[0], sim_mesh, sim_dimensions, sim_workflow, Simulation_Results())
 
         output_list.append(sim_param)
@@ -341,9 +341,9 @@ def fluent_sim_setup(sim_list, processes):
 
     for i in range(len(sim_list)):
         sim = sim_list[i]
-        if sim.Workflow_Properties.sol_method.lower() in komega:
+        if sim.workflow.sol_method.lower() in komega:
             komega_setup(sim, processes)
-        elif sim.Workflow_Properties.sol_method.lower() in tsst:
+        elif sim.workflow.sol_method.lower() in tsst:
             tsst_setup(sim, processes)
         designPoint1 = Parameters.GetDesignPoint(Name="{}".format(i))
         design_points.append(designPoint1)
@@ -372,7 +372,7 @@ def komega_setup(simulation, processes):
     system1 = template1.CreateSystem()
     setup1 = system1.GetContainer(ComponentName="Setup")
     fluentLauncherSettings1 = setup1.GetFluentLauncherSettings()
-    fluentLauncherSettings1.SetEntityProperties(Properties=Set(Dimension="ThreeD", EnvPath={}, RunParallel=True, NumberOfProcessors=32))
+    fluentLauncherSettings1.SetEntityProperties(Properties=Set(Dimension="ThreeD", EnvPath={}, RunParallel=True, NumberOfProcessors=processes))
     setup1.Edit()
     setup1.SendCommand(Command="(cx-gui-do cx-activate-item \"MenuBar*ImportSubMenu*Case...\")(cx-gui-do cx-set-file-dialog-entries \"Select File\" '( \"{}/{}.cas\") \"All Case Files (*.cas* *.msh* *.MSH* )\")".format((simulation.mesh.CAS_dir.replace(os.sep, '/')), simulation.mesh.CAS_name))
     setup1.SendCommand(Command='(cx-gui-do cx-activate-item "General*Table1*ButtonBox1(Mesh)*PushButton1(Scale)")')
