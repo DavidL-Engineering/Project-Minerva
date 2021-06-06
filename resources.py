@@ -345,7 +345,7 @@ def fluent_sim_setup(sim_list, processes):
     
     Save(Overwrite=True)
     designPoint1 = Parameters.GetDesignPoint(Name="0")
-    backgroundSession1 = UpdateAllDesignPoints(DesignPoints = designPoint1)
+    backgroundSession1 = UpdateAllDesignPoints(DesignPoints = [designPoint1])
     return
 
 def komega_setup(simulation, processes):
