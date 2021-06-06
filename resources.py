@@ -333,7 +333,7 @@ def fluent_sim_setup(sim_list, processes):
     komega = ["komega", "k-omega", "k-w", "kw"]
     tsst = ["t-sst", "tsst"]
 
-    design_points = []
+    # design_points = []
 
     for i in range(len(sim_list)):
         sim = sim_list[i]
@@ -341,11 +341,11 @@ def fluent_sim_setup(sim_list, processes):
             komega_setup(sim, processes)
         elif sim.workflow.sol_method.lower() in tsst:
             tsst_setup(sim, processes)
-        designPoint1 = Parameters.GetDesignPoint(Name="{}".format(i))
-        design_points.append(designPoint1)
+        # designPoint1 = Parameters.GetDesignPoint(Name="{}".format(i))
+        # design_points.append(designPoint1)
     
     Save(Overwrite=True)
-    backgroundSession1 = UpdateAllDesignPoints(DesignPoints = design_points)
+    # backgroundSession1 = UpdateAllDesignPoints(DesignPoints = design_points)
     return
 
 def komega_setup(simulation, processes):
