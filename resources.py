@@ -335,7 +335,7 @@ def fluent_sim_setup(sim_list, processes):
 
     design_points = []
 
-    for i in sim_list:
+    for i in range(len(sim_list)):
         sim = sim_list[i]
         if sim.Workflow_Properties.sol_method.lower() in komega:
             komega_setup(sim, processes)
