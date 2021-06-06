@@ -341,7 +341,7 @@ def fluent_sim_setup(sim_list, processes):
             komega_setup(sim, processes)
         elif sim.Workflow_Properties.sol_method.lower() in tsst:
             tsst_setup(sim, processes)
-        designPoint1 = Parameters.GetDesignPoint(Name=i)
+        designPoint1 = Parameters.GetDesignPoint(Name="{}".format(i))
         design_points.append(designPoint1)
     
     Save(Overwrite=True)
