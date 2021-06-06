@@ -14,3 +14,4 @@ Journal Logs/
 .vscode/settings.json
 __pycache__/resources.cpython-39.pyc
 ANSYS Batch Archive.csv
+Simulation Results.csv
