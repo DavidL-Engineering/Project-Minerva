@@ -756,7 +756,7 @@ def fluent_results_aggregator(simulation, index, proj_params):
     return(simulation)
 
 def results_formatter(sim_list, proj_params):
-    export_directory = os.path.join(proj_params.results_dir).replace(os.sep, '/')
+    export_directory = proj_params.results_dir.replace(os.sep, '/')
 
     current_date = date.today().strftime("%d/%m/%Y")
 
