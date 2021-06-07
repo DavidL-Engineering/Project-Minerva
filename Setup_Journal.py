@@ -767,7 +767,7 @@ def results_formatter(sim_list, proj_params):
     current_date = date.today().strftime("%d/%m/%Y")
 
     with open("{}/{} Simulation Results.csv".format(export_directory, proj_params.proj_name), 'w') as csvfile:
-        csvfile.write('Simulation Name,.CAS File Name,Date,Number of Iterations,A. Drag [N] (Total),B. Drag [N]: Pressure + Viscous,A. Lift [N] (Total),B. Lift [N]: Pressure + Viscous,Force Left [N] (Total),Force Right [N] (Total),"Roll Moment [N-m] (axis = [1,0,0])","Pitch Moment [N-m] (axis = [0,1,0])",Center of Pressure (x=0 [m]),Status\n')
+        csvfile.write('Simulation Name,.CAS File Name,Date,Number of Iterations,A. Drag [N] (Total),B. Drag [N]: Pressure + Viscous,A. Lift [N] (Total),B. Lift [N]: Pressure + Viscous,Force Left [N] (Total),Force Right [N] (Total),"Roll Moment [N-m] (axis = [1,0,0])","Pitch Moment [N-m] (axis = [0,1,0])","Yaw Moment [N-m] (axis = [0,0,1])",Center of Pressure (x=0 [m]),Status\n')
         for i in range(len(sim_list)):
             simulation = sim_list[i]
             if simulation.results.convergence == "Converged":
