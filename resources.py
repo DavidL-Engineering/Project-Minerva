@@ -744,9 +744,15 @@ def fluent_results_aggregator(simulation, index, proj_params):
     simulation.results.lift_comp = lift_comp_values
     simulation.results.f_left = f_left_value
     simulation.results.f_right = f_right_value
-    simulation.results.mom_roll = roll_value
-    simulation.results.mom_pitch = pitch_value
-    simulation.results.mom_yaw = yaw_value
+
+    if simulation.workflow.CG == True:
+      simulation.results.mom_roll = roll_value
+      simulation.results.mom_pitch = pitch_value
+      simulation.results.mom_yaw = yaw_value
+    else:
+      simulation.results.mom_roll = 0
+      simulation.results.mom_pitch = 0
+      simulation.results.mom_yaw = 0
     simulation.results.cop = cop_values
 
     return(simulation)
@@ -757,7 +763,7 @@ def results_formatter(sim_list, proj_params):
     current_date = date.today().strftime("%d/%m/%Y")
 
     with open("{}/Simulation Results.csv".format(export_directory), 'w') as csvfile:
-        csvfile.write('Simulation Name,.CAS File Name,Date,Number of Iterations,A. Drag [N] (Total),B. Drag [N]: Pressure + Viscous,A. Lift [N] (Total),B. Lift [N]: Pressure + Viscous,Force Left [N] (Total),Force Right [N] (Total),"Roll Moment [N-m] (axis = [1,0,0])","Pitch Moment [N-m] (axis = [0,1,0])",Center of Pressure (x=0 [m]),Status\n')
+        csvfile.write('Simulation Name,.CAS File Name,Date,Number of Iterations,A. Drag [N] (Total),B. Drag [N]: Pressure + Viscous,A. Lift [N] (Total),B. Lift [N]: Pressure + Viscous,Force Left [N] (Total),Force Right [N] (Total),"Roll Moment [N-m] (axis = [1,0,0])","Pitch Moment [N-m] (axis = [0,1,0])","Yaw Moment [N-m] (axis = [0,0,1])",Center of Pressure (x=0 [m]),Status\n')
         for i in range(len(sim_list)):
             simulation = sim_list[i]
             if simulation.results.convergence == "Converged":

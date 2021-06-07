@@ -748,9 +748,15 @@ def fluent_results_aggregator(simulation, index, proj_params):
     simulation.results.lift_comp = lift_comp_values
     simulation.results.f_left = f_left_value
     simulation.results.f_right = f_right_value
-    simulation.results.mom_roll = roll_value
-    simulation.results.mom_pitch = pitch_value
-    simulation.results.mom_yaw = yaw_value
+
+    if simulation.workflow.CG == True:
+      simulation.results.mom_roll = roll_value
+      simulation.results.mom_pitch = pitch_value
+      simulation.results.mom_yaw = yaw_value
+    else:
+      simulation.results.mom_roll = 0
+      simulation.results.mom_pitch = 0
+      simulation.results.mom_yaw = 0
     simulation.results.cop = cop_values
 
     return(simulation)
