@@ -20,11 +20,12 @@ series = []
 archive_name = []
 
 for line in lines:
-    proj_dir.append(line[0])
-    proj_name.append(line[1])
-    cycle.append(line[2])
-    series.append(line[3])
-    archive_name.append(line[4])
+    entries = line.split(",")
+    proj_dir.append(entries[0])
+    proj_name.append(entries[1])
+    cycle.append(entries[2])
+    series.append(entries[3])
+    archive_name.append(entries[4])
 
 csvfile.close()
 
