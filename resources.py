@@ -366,6 +366,7 @@ def komega_setup(simulation, processes):
     
     template1 = GetTemplate(TemplateName="FLUENT")
     system1 = template1.CreateSystem()
+    system1.DisplayText = simulation.sim_name
     setup1 = system1.GetContainer(ComponentName="Setup")
     fluentLauncherSettings1 = setup1.GetFluentLauncherSettings()
     fluentLauncherSettings1.SetEntityProperties(Properties=Set(Dimension="ThreeD", EnvPath={}, RunParallel=True, NumberOfProcessors=processes))
