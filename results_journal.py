@@ -277,11 +277,11 @@ def results_dir(sim_list, proj_params):
     '''
     
     for simulation in sim_list:
-        results_dir_check(proj_params.results_dir, simulation.sim_name, simulation.workflow.post, simulation.workflow.streamlines)
+        results_dir_check(proj_params.results_dir, simulation.sim_name, simulation.workflow.post, simulation.workflow.streamlines, simulation.results.convergence)
     
     return
 
-def results_dir_check(path, name, post, streamlines):
+def results_dir_check(path, name, post, streamlines, status):
     '''
     Checks if path to results folder exists and creates parent and sub-folders for indicated results folder and post-processing folders.
 
@@ -303,11 +303,14 @@ def results_dir_check(path, name, post, streamlines):
         os.mkdir(path)
     
     sim_path = os.path.join(path, name)
-    
-    if post:
-        sim_path = os.path.join(path, name)
+
+    if (status == "Converged"):
         if (os.path.exists(sim_path) == False):
             os.mkdir(sim_path)
+            raw_results_dir = os.path.join(sim_path, "Raw Results")
+            os.mkdir(raw_results_dir)
+    
+    if post:
         media_dir = os.path.join(sim_path, "Media Files")
         if (os.path.exists(media_dir) == False):
             os.mkdir(media_dir)
@@ -3329,8 +3332,8 @@ os.chdir(dir)
 
 Save(Overwrite=True)
 
-results_dir(sim_list, proj_params)
-
 sim_list = convergence_status(sim_list, proj_params)
+
+results_dir(sim_list, proj_params)
 
 results_extract(sim_list, proj_params)
