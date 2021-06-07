@@ -25,7 +25,7 @@ for line in lines:
     proj_name.append(entries[1])
     cycle.append(entries[2])
     series.append(entries[3])
-    archive_name.append(entries[4])
+    archive_name.append(entries[4].strip())
 
 csvfile.close()
 
