@@ -1,4 +1,5 @@
 import os
+import time
 from datetime import date
 
 class Mesh_Properties:
@@ -239,7 +240,7 @@ def proj_param_extract(line):
         Instance of Project class containing parameters of Workbench project.
     '''
 
-    proj_param = Project(line[14], line[15], line[16], line[17])
+    proj_param = Project(line[15], line[16], line[17], line[18])
 
     return(proj_param)
 
@@ -548,6 +549,42 @@ def tsst_setup(simulation, processes):
     setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*FileMenu*Close Fluent")')
     Save(Overwrite=True)
 
+    return
+
+def completion_status(sim_list, proj_params):
+    '''
+    Detects if entire workbench project has finished running simulations.
+
+    Parameters
+    ---------------------
+    sim_list : List 
+        List containing Simulation objects.
+    proj_params : Project object
+        Instance of Project class containing project parameters.
+
+    Returns
+    ---------------------
+    None
+    '''
+
+    wb_files_dir = os.path.join(proj_params.proj_dir, proj_params.proj_name + "_files")
+
+    last_sim_index = len(sim_list)-1
+
+    complete = 0
+
+    if last_sim_index == 0:
+        flu_dir = "FLU"
+    else:
+        flu_dir = "FLU-{}".format(last_sim_index)
+
+    last_sim_dir = "{}\\progress_files\\dp0\\{}\\Fluent\\Solution.trn".format(wb_files_dir, flu_dir)
+    while complete == 0:
+        if os.path.isfile(last_sim_dir):
+            complete = 1
+        else:
+            time.sleep(60)
+    
     return
 
 def convergence_status(sim_list, proj_params):
