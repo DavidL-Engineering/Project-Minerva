@@ -2353,7 +2353,6 @@ def post_plots(simulation, index, proj_params):
 
     return
 
-
 def post_streamlines_fb(simulation, index, proj_params):
     if index==0:
         module = "POST"
