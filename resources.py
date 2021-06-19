@@ -53,21 +53,23 @@ class Workflow_Properties:
     Instance Variables
     ---------------------
     sol_method : Desired solution method. Either K-W or T-SST. [str]
-    CG : Specification of whether CG is entered and valid. [bool]
+    velocity : Inlet and road velocity. [float]
+    cg : Specification of whether CG is entered and valid. [bool]
     post : Specification of whether post-processing is desired if simulation converges. [bool]
     streamlines : Specification of whether streamline animations are desired in post-processing. [bool]
     '''
     
-    def __init__(self, sol_method = None, CG = None, post = None, streamlines = None):
+    def __init__(self, sol_method = None, velocity = None, cg = None, post = None, streamlines = None):
         '''Define instance variables.'''
         self.sol_method = sol_method #Either K-W or T-SST
-        self.CG = CG #Either True or False
+        self.velocity = velocity
+        self.cg = cg #Either True or False
         self.post = post #Either True or False
         self.streamlines = streamlines #True or False
 
     def __str__(self):
         '''Print properties of Dimension_Properties object.'''
-        return "\n----WORKFLOW PROPERTIES----\nSolution method: {}\nCG: {}\nPost-Processing: {}\nStreamline Animations: {}".format(self.sol_method, self.CG, self.post, self.streamlines)
+        return "\n----WORKFLOW PROPERTIES----\nSolution method: {}\nVelocity: {}\nCG: {}\nPost-Processing: {}\nStreamline Animations: {}".format(self.sol_method, self.velocity, self.cg, self.post, self.streamlines)
 
 class Simulation_Results:
     '''
@@ -183,30 +185,36 @@ def param_extract(input_file):
 
     for line in lines:
         line = line.split(",")
+        print(line)
         
         if (line[3].lower() in half_body):
           sim_mesh = Mesh_Properties(line[1], line[2], "HB")
         elif (line[3].lower() in full_body):
           sim_mesh = Mesh_Properties(line[1], line[2], "FB")
 
-        if (line[7] == "Y") or (line[7] == "y"):
-            sim_dimensions = Dimension_Properties(line[5], line[6], line[8], line[9], line[10])
+        if (line[8] == "Y") or (line[8] == "y"):
+            sim_dimensions = Dimension_Properties(float(line[6]), float(line[7]), float(line[9]), float(line[10]), float(line[11]))
             CG_bool = True
         else:
-            sim_dimensions = Dimension_Properties(line[5], line[6], 0, 0, 0)
+            sim_dimensions = Dimension_Properties(float(line[6]), float(line[7]), 0, 0, 0)
             CG_bool = False
 
-        if (line[11] == "Y") or (line[11] == "y"):
+        if (line[12] == "Y") or (line[12] == "y"):
             post_bool = True
         else:
             post_bool = False
 
-        if (line[12] == "Y") or (line[12] == "y"):
+        if (line[13] == "Y") or (line[13] == "y"):
             streamlines_bool = True
         else:
             streamlines_bool = False
+        
+        if line[5] == "":
+          velocity = 18.0
+        else:
+          velocity = float(line[5])
 
-        sim_workflow = Workflow_Properties(line[4], CG_bool, post_bool, streamlines_bool)
+        sim_workflow = Workflow_Properties(line[4], velocity, CG_bool, post_bool, streamlines_bool)
         sim_param = Simulation(line[0], sim_mesh, sim_dimensions, sim_workflow, Simulation_Results())
 
         output_list.append(sim_param)
@@ -394,10 +402,10 @@ def komega_setup(simulation, processes):
     setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*List_Tree1" (list "Setup|Boundary Conditions|Inlet|inlet (velocity-inlet, id=5)"))(cx-gui-do cx-activate-item "NavigationPane*List_Tree1")')
     setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*List_Tree1\" (list \"Setup|Boundary Conditions|Inlet|inlet (velocity-inlet, id=5)\"))(cx-gui-do cx-set-list-selections \"Velocity Inlet*Frame3*Frame1(Momentum)*Table1*DropDownList6(Velocity Specification Method)\" '( 0))")
     setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Velocity Inlet*Frame3*Frame1(Momentum)*Table1*DropDownList6(Velocity Specification Method)")')
-    setup1.SendCommand(Command="(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame3*Frame1(Momentum)*Table1*Table8*ExpressionEntry1(Velocity Magnitude)\" '(\"18\" . 0))(cx-gui-do cx-activate-item \"Velocity Inlet*PanelButtons*PushButton1(OK)\")")
+    setup1.SendCommand(Command="(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame3*Frame1(Momentum)*Table1*Table8*ExpressionEntry1(Velocity Magnitude)\" '(\"{}\" . 0))(cx-gui-do cx-activate-item \"Velocity Inlet*PanelButtons*PushButton1(OK)\")".format(simulation.workflow.velocity))
     setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*List_Tree1" (list "Setup|Boundary Conditions|Wall|road (wall, id=7)"))')
     setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*List_Tree1" (list "Setup|Boundary Conditions|Wall|road (wall, id=7)"))(cx-gui-do cx-activate-item "NavigationPane*List_Tree1")')
-    setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*List_Tree1\" (list \"Setup|Boundary Conditions|Wall|road (wall, id=7)\"))(cx-gui-do cx-set-toggle-button2 \"Wall*Frame3*Frame1(Momentum)*Table1*Frame1*Frame1*Table1*ToggleBox1(Wall Motion)*Moving Wall\" #t)(cx-gui-do cx-activate-item \"Wall*Frame3*Frame1(Momentum)*Table1*Frame1*Frame1*Table1*ToggleBox1(Wall Motion)*Moving Wall\")(cx-gui-do cx-set-toggle-button2 \"Wall*Frame3*Frame1(Momentum)*Table1*Frame1*Frame1*Table1*Table2(Motion)*Table1*ToggleBox1*Absolute\" #t)(cx-gui-do cx-activate-item \"Wall*Frame3*Frame1(Momentum)*Table1*Frame1*Frame1*Table1*Table2(Motion)*Table1*ToggleBox1*Absolute\")(cx-gui-do cx-set-expression-entry \"Wall*Frame3*Frame1(Momentum)*Table1*Frame1*Frame1*Table1*Table2(Motion)*Table2*Table1*ExpressionEntry1(Speed)\" '(\"18\" . 0))(cx-gui-do cx-activate-item \"Wall*PanelButtons*PushButton1(OK)\")")
+    setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*List_Tree1\" (list \"Setup|Boundary Conditions|Wall|road (wall, id=7)\"))(cx-gui-do cx-set-toggle-button2 \"Wall*Frame3*Frame1(Momentum)*Table1*Frame1*Frame1*Table1*ToggleBox1(Wall Motion)*Moving Wall\" #t)(cx-gui-do cx-activate-item \"Wall*Frame3*Frame1(Momentum)*Table1*Frame1*Frame1*Table1*ToggleBox1(Wall Motion)*Moving Wall\")(cx-gui-do cx-set-toggle-button2 \"Wall*Frame3*Frame1(Momentum)*Table1*Frame1*Frame1*Table1*Table2(Motion)*Table1*ToggleBox1*Absolute\" #t)(cx-gui-do cx-activate-item \"Wall*Frame3*Frame1(Momentum)*Table1*Frame1*Frame1*Table1*Table2(Motion)*Table1*ToggleBox1*Absolute\")(cx-gui-do cx-set-expression-entry \"Wall*Frame3*Frame1(Momentum)*Table1*Frame1*Frame1*Table1*Table2(Motion)*Table2*Table1*ExpressionEntry1(Speed)\" '(\"{}\" . 0))(cx-gui-do cx-activate-item \"Wall*PanelButtons*PushButton1(OK)\")".format(simulation.workflow.velocity))
     setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*List_Tree1" (list "Setup|Boundary Conditions|Wall|walls (wall, id=8)"))')
     setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*List_Tree1" (list "Setup|Boundary Conditions|Wall|walls (wall, id=8)"))(cx-gui-do cx-activate-item "NavigationPane*List_Tree1")')
     setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*List_Tree1" (list "Setup|Boundary Conditions|Wall|walls (wall, id=8)"))(cx-gui-do cx-set-toggle-button2 "Wall*Frame3*Frame1(Momentum)*Table1*Frame2*Frame1*Table1*ToggleBox1(Shear Condition)*Specified Shear" #t)(cx-gui-do cx-activate-item "Wall*Frame3*Frame1(Momentum)*Table1*Frame2*Frame1*Table1*ToggleBox1(Shear Condition)*Specified Shear")(cx-gui-do cx-activate-item "Wall*PanelButtons*PushButton1(OK)")')
