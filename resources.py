@@ -455,7 +455,6 @@ def komega_setup(simulation, processes):
 
     return
 
-
 def tsst_setup(simulation, processes):
     '''
     Performs setup of Fluent module with T-SST solution method.

@@ -3,6 +3,7 @@
 SetScriptVersion(Version="20.1.164")
 
 import os
+import time
 from datetime import date
 
 class Mesh_Properties:
@@ -457,7 +458,6 @@ def komega_setup(simulation, processes):
     Save(Overwrite=True)
 
     return
-
 
 def tsst_setup(simulation, processes):
     '''
