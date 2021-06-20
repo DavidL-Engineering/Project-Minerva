@@ -794,7 +794,7 @@ def fluent_results_aggregator(simulation, index, proj_params):
     simulation.results.f_left = f_left_value
     simulation.results.f_right = f_right_value
 
-    if simulation.workflow.CG == True:
+    if simulation.workflow.cg == True:
       simulation.results.mom_roll = roll_value
       simulation.results.mom_pitch = pitch_value
       simulation.results.mom_yaw = yaw_value
@@ -1331,7 +1331,7 @@ def post_plots(simulation, index, proj_params):
       OBJECT REPORT OPTIONS:
           Report Caption = Pressure coefficient along centerline of car by distance along X axis from nose of car
       END
-    END""".format(modules[0]))
+    END""".format(simulation.sim_name))
     results1.SendCommand(Command=">chart print, Chart Name = /CHART:Cp vs X Coord, filename = {}/Cp vs X Coord.png, x size = 2000, y size = 2000, format = png, factor = 1.83074".format(media_dir))
     results1.SendCommand(Command="> report hideItem=/CHART:Cp vs X Coord")
     results1.SendCommand(Command="""# Sending visibility action from ViewUtilities
@@ -3381,6 +3381,8 @@ os.chdir(dir)
 (sim_list, proj_params) = param_extract("Simulation Parameters.csv")
 
 Save(Overwrite=True)
+
+completion_status(sim_list, proj_params)
 
 sim_list = convergence_status(sim_list, proj_params)
 
