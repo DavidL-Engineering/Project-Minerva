@@ -325,7 +325,8 @@ def results_dir_check(path, name, post, streamlines, status):
             if (os.path.exists(media_dir + subdir) == False):
                 os.mkdir(media_dir + subdir)
         if streamlines:
-            os.mkdir(media_dir + "\\Streamline Animations")
+            if (os.path.exists(media_dir + "\\Streamline Animations")) == False:
+                os.mkdir(media_dir + "\\Streamline Animations")
     return
 
 def fluent_sim_setup(sim_list, processes):
