@@ -825,7 +825,7 @@ def post_processing(sim_list, proj_params):
 
     for i in range(len(sim_list)):
         if sim_list[i].workflow.post == True:
-            post_plots(sim_list[i], i, proj_params)
+            # post_plots(sim_list[i], i, proj_params)
             if sim_list[i].workflow.streamlines == True:
                 stream.append(i)
 
@@ -841,10 +841,10 @@ def post_processing(sim_list, proj_params):
 def post_plots(simulation, index, proj_params):
     sim_path = os.path.join(proj_params.results_dir, simulation.sim_name)
     media_dir = os.path.join(sim_path, "Media Files")
-    cp_dir = os.path.join(media_dir, "\\3D Cp Contour").replace(os.sep, '/')
-    pressure_dir = os.path.join(media_dir, "\\Pressure Contour").replace(os.sep, '/')
-    tke_dir = os.path.join(media_dir, "\\TKE Contour").replace(os.sep, '/')
-    wallshear_dir = os.path.join(media_dir, "\\Wall Shear Streamline").replace(os.sep, '/')
+    cp_dir = os.path.join(media_dir, "3D Cp Contour")
+    pressure_dir = os.path.join(media_dir, "Pressure Contour")
+    tke_dir = os.path.join(media_dir, "TKE Contour")
+    wallshear_dir = os.path.join(media_dir, "Wall Shear Streamline")
     
     
     if index == 0:
@@ -2359,9 +2359,9 @@ def post_plots(simulation, index, proj_params):
 
 def post_streamlines_fb(simulation, index, proj_params):
     if index==0:
-        module = "POST"
+        module = "Post"
     else:
-        module = "POST {}".format(index)
+        module = "Post {}".format(index)
     
     sim_path = os.path.join(proj_params.results_dir, simulation.sim_name)
     media_dir = os.path.join(sim_path, "Media Files")
