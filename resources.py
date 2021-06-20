@@ -825,7 +825,7 @@ def post_processing(sim_list, proj_params):
 
     for i in range(len(sim_list)):
         if sim_list[i].workflow.post == True:
-            # post_plots(sim_list[i], i, proj_params)
+            post_plots(sim_list[i], i, proj_params)
             if sim_list[i].workflow.streamlines == True:
                 stream.append(i)
 
