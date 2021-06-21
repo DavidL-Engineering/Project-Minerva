@@ -1,8 +1,6 @@
-# Project Minerva Description
+# Project Description
 
----
-
-Project Minerva is a collection of tools designed to support workflow automation as part of the Blue Sky Gen 11/12 cycle. Written in Python, it is the successor of Project Liber, and is designed to be used with ANSYS 2020 R1. 
+Project Minerva is a collection of tools designed to support workflow automation as part of the Gen 11/12 cycle. Written in Python, it is the successor of Project Liber, and is designed to be used with ANSYS 2020 R1. 
 
 Project Minerva is able to automate the following aspects of the simulation workflow
 
@@ -24,8 +22,6 @@ Project Minerva is able to automate the following aspects of the simulation work
 - ANSYS Workbench project archiving to the archive in the Aero Network Drive
 
 # Requirements
-
----
 
 ## Aerobody CAD Requirements
 
@@ -50,8 +46,6 @@ Boundary Conditions:
 Only alphanumeric characters and spaces are permitted for user-created `.CAS` files, simulation names, project names, archive names, and directories.
 
 # Installation Details
-
----
 
 ### Prerequisites
 
@@ -78,15 +72,11 @@ When using Project Minerva, copy **all** the relevant files to the desired locat
 
 # Interface-Structure
 
----
-
 Project Minerva's data entry is accomplished entirely through CSV files that may be opened in Excel. 
 
 The Python files that generate the CSV files are designed to be run every time the CSV file is intended to be filled out. This is because there are pre-filled entries (such as the number of Fluent Processes to use) which are determined on a real-time and per-machine basis. **If you are entering data into the CSV, always run the relevant CSV generating script before doing so.**
 
 # Automated Simulation & Post-Processing Workflow
-
----
 
 ## Description
 
@@ -117,8 +107,7 @@ Due to the nature of convergence status detection, it is not currently possible 
 Copy the following files from extracted contents of `Project-Minerva-master.zip` into a single folder:
 
 - `generate_setup_csv.py`
-- `setup_journal.py`
-- `results_journal.py`
+- `full_journal.py`
 
 ### Project and Fluent Setup Automation
 
@@ -138,9 +127,9 @@ Open `Simulation Parameters.csv` .
 
 In this CSV, all information pertaining to each simulation must be entered. The properties of each simulation are to be entered on one row, with each row denoting a different simulation.
 
-Columns A-M must be entered for every simulation.
+Columns A-N must be entered for every simulation.
 
-Columns O-R are project parameters and **must be entered only once in row 2.**
+Columns P-S are project parameters and **must be entered only once in row 2.**
 
 In column A, enter the name of the simulation. E.g. `DV6 2D Canopy Variations A1`
 
@@ -186,19 +175,17 @@ Open ANSYS Workbench 2020 R1, and navigate to File→ Scripting→Run Script Fil
 
 Click the drop-down menu labelled `Journal Files (.wbjn)` and select `Python Script Files (*.py)`.
 
-Navigate to the directory where the three Python files and the current CSV file are stored, click on `setup_journal.py`, and click OK.
+Navigate to the directory where the two Python files and the current CSV file are stored, click on `full_journal.py`, and click OK.
 
 The simulations should be setup and run automatically from this point on.
 
-One may move on to *Data Extraction and Post-Processing Automation* when all simulations have completed, even if not converged.
+### Numerical and Post-Processing Results
 
-### Data Extraction and Post-Processing Automation
+The numerical results extracted from each of the converged simulations may be found in a file titled `$Project_Name$.csv`, where `$Project_Name$` is replaced by the name of the workbench project indicated in column P of the `Simulation Parameters.csv` file. This file is stored in the results directory inputted in column R of `Simulation Parameters.csv`.
 
-Put instructions here
+Post-processing results are stored in the "Media Files" folder within each simulation's individual results folder. The individual simulation results folders are located in the results directory inputted in column R of `Simulation Parameters.csv`, with names identical to the names of the simulations inputted in column A of `Simulation Parameters.csv`.
 
 # Automated Workbench Project Archival
-
----
 
 ## Description
 
