@@ -2366,10 +2366,10 @@ def post_streamlines_fb(simulation, index, proj_params):
         module = "Post"
     else:
         module = "Post {}".format(index)
-    
+
     sim_path = os.path.join(proj_params.results_dir, simulation.sim_name)
     media_dir = os.path.join(sim_path, "Media Files")
-    animate_dir = os.path.join(media_dir, "\\Streamline Animations")
+    animate_dir = os.path.join(media_dir, "Streamline Animations")
     
     system1 = GetSystem(Name=module)
     results1 = system1.GetContainer(ComponentName="Results")
