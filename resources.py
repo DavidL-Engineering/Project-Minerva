@@ -1,6 +1,7 @@
 import os
 import time
 from datetime import date
+from datetime import datetime
 
 class Mesh_Properties:
     '''
@@ -186,7 +187,6 @@ def param_extract(input_file):
 
     for line in lines:
         line = line.split(",")
-        print(line)
         
         if (line[3].lower() in half_body):
           sim_mesh = Mesh_Properties(line[1], line[2], "HB")
@@ -3370,3 +3370,19 @@ def post_streamlines_hb(simulation, index, proj_params):
     results1.Exit()
 
     return
+
+def name_check(sim_list):
+  names = []
+  for i in range(len(sim_list)):
+    names.append(sim_list[i].sim_name)
+  
+  current_date = date.today().strftime("%Y-%m-%d")
+  now = datetime.now()
+  current_time = now.strftime("%H%M%S")
+
+  if len(names) != len(set(names)):
+    with open("MINERVA ERROR LOG {}T{}.txt".format(current_date, current_time), 'w') as error_log:
+      error_log.write('{}T{}: Error in Column A: Simulation names must be unique.'.format(current_date, current_time))
+    exit()
+  
+  return
