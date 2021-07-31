@@ -2,7 +2,7 @@ import os
 from psutil import virtual_memory
 
 tot_mem_GB = round(virtual_memory().total / (1024 ** 3))
-cores_by_mem = tot_mem_GB / 8
+cores_by_mem = tot_mem_GB // 8
 
 physical_cores = os.cpu_count()/2
 
