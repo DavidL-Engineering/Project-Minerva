@@ -203,7 +203,7 @@ Copy the following files from extracted contents of `Project-Minerva-master.zip`
 Double click `generate_archive_csv.py` to generate the CSV where the workbench project information will be entered. The CSV should be generated in the same folder as the other three Python files. If no CSV is generated, ensure that Python is installed. If Python is installed, navigate to the folder in which the newly copied files are stored and type `cmd` in the Windows Explorer address bar, which opens a command prompt. In the command prompt, type:
 
 ```python
-python gneerate_archive_csv.py
+python generate_archive_csv.py
 ```
 
 The result of running this file should be the creation of a file titled `ANSYS Batch Archive.csv`.
